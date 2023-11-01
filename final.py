@@ -100,6 +100,45 @@ def check_2NF(FD,Key):
                     return False
         return True
 
+def convert_to_2NF(FD, Key):
+    tables = {}
+    res_table = {}
+
+    for fd in FD:
+        lhs, rhs = fd.split('->')
+        lhs = lhs.strip().split(',')
+        rhs = rhs.strip().split(',')
+
+        if(sorted(lhs)==sorted(Key)):
+            if(tables.get('Candidate')==None):
+                tables["Candidate"] = lhs
+                tables["Candidate"].extend(rhs)
+            else:
+                tables["Candidate"].extend(rhs)
+        
+        if(set(sorted(lhs)).issubset(set(sorted(Key)))):
+            if(len(lhs)==1):
+                x = str(lhs[0])
+                if(tables.get(x)==None):
+                    tables[x] = lhs
+                    tables[x].extend(rhs)
+                else:
+                    tables[x].extend(rhs)
+        else:
+            if(tables.get('Candidate')==None):
+                tables["Candidate"] = lhs
+                tables["Candidate"].extend(rhs)
+            else:
+                tables["Candidate"].extend(rhs)
+    
+    check_key = 0
+    for table, attributes in tables.items():
+        if(set(sorted(Key)).issubset(set(sorted(attributes)))):
+            check_key = 1
+    if(check_key == 0):
+        tables["C"] = Key     
+    return tables
+
 def check_3nf(FD, Key):
     c_key = ""
     for i in Key:
@@ -125,6 +164,49 @@ def check_3nf(FD, Key):
                     return False
     return True  
 
+def generate_sql_queries(FD, Key, tables, data_types):
+    sql_statements = []
+    fd_lhs = []
+    fd_rhs = []
+
+    for fd in FD:
+        lhs, rhs = fd.split('->')
+        x = lhs.strip().split(',')
+        for i in x:
+            if(i not in fd_lhs):
+                fd_lhs.append(i)
+        y = rhs.strip().split(',')
+        for i in y:
+            if(i not in fd_rhs):
+                fd_rhs.append(y)
+
+    for table_name, columns in tables.items():
+        foreign_query = ""
+        query = f'CREATE TABLE {table_name} ('
+    
+        count_of_keys = 0
+        for x in columns:
+            if x in fd_lhs:
+                count_of_keys += 1
+
+        for i in range(len(columns)):
+            attr = columns[i]
+            query += f'{attr} {data_types.get(attr)}'
+            if(count_of_keys==1) and (attr in fd_lhs):
+                query += " PRIMARY KEY"
+            elif(attr == table_name):
+                query += " PRIMARY KEY"
+            elif(attr in fd_lhs):
+                foreign_query += f', FOREIGN KEY {attr} REFERENCES {attr}({attr})'
+            if(i != (len(columns)-1)):
+                query += ", "
+        
+        query += foreign_query
+        query += ");"
+    
+        sql_statements.append(query)
+    
+    return sql_statements
 
 print("Enter the csv file path:")
 csv_filePath = input()
