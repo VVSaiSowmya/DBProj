@@ -498,7 +498,48 @@ def convert_to_4NF(FD, Key, MVD, tables):
 
 # Function used to convert the given table to Fifth Normal Form (5NF)
 def convert_to_5NF(FD, Key, MVD, tables):
-    return True
+    # Create a dictionary to represent tables in 5NF
+    new_tables = {}
+
+    # Create sets to track keys and attributes
+    key = set(KEY)
+    attributes = set(KEY)
+
+    # Extract attributes from FDs and MVDs
+    for fd in FD:
+        left, right = fd.split(" -> ")
+        attributes.update(map(str.strip, right.split(', ')))
+
+    for mvd in MVD:
+        left, right = mvd.split(" ->> ")
+        attributes.update(map(str.strip, left.split(', ')))
+        attributes.update(map(str.strip, right.split(', ')))
+
+    # Create new tables for attributes
+    for attr in attributes:
+        new_tables[attr] = []
+
+    # Distribute data from the original tables
+    for table in tables:
+        for attr in attributes:
+            if attr in table:
+                new_table = {attr: table[attr]}
+                new_tables[attr].append(new_table)
+
+    # Perform natural join on new tables
+    for attr1, attr2 in combinations(attributes, 2):
+        new_table = {}
+        new_table[attr1] = []
+        new_table[attr2] = []
+
+        for data1, data2 in zip(new_tables[attr1], new_tables[attr2]):
+            if data1[attr1] == data2[attr2]:
+                new_table[attr1].append(data1[attr1])
+                new_table[attr2].append(data2[attr2])
+
+        new_tables[f"{attr1}_{attr2}"] = new_table
+
+    return new_tables
 
 # Function used to generate SQL queries
 def generate_sql_queries(FD, Key, tables, data_types):
