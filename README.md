@@ -4,6 +4,8 @@ Venkata Sai Sowmya Velamuri - 12607142
 Navya Valivati - 12608155
 Chandana Dontraboina - 12606139
 
+**Important Note : The Output text file is generated when we run final.py with input provided**
+
 **Description of Project**
 
 Input – 
