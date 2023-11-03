@@ -1,4 +1,10 @@
-#Data Base Project
+#Data Base Group Project
+**Group Members : **
+Venkata Sai Sowmya Velamuri - 12607142
+Navya Valivati - 12608155
+Chandana Dontraboina - 12606139
+
+**Description of Project**
 
 Input – 
 1.	Database Table (.csv) file path.
